@@ -2,7 +2,13 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { MealLog, UserProfile, InBodyData } from "./types";
 
-const getAI = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
+const getAI = () => {
+  const apiKey = process.env.API_KEY;
+  if (!apiKey) {
+    console.error("【警告】API_KEYが設定されていません。VercelのEnvironment Variablesを確認してください。");
+  }
+  return new GoogleGenAI({ apiKey: apiKey || "" });
+};
 
 const parseJsonSafe = (text: string | undefined) => {
   if (!text) return {};
@@ -32,6 +38,7 @@ export const analyzeMeal = async (text: string, base64Image?: string) => {
     });
     return parseJsonSafe(response.text);
   } catch (e) {
+    console.error("AI Analysis Error:", e);
     return { calories: 0, protein: 0, fat: 0, carbs: 0, aiAnalysis: "解析に失敗しました。" };
   }
 };
