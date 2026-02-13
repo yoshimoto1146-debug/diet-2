@@ -5,28 +5,39 @@ import Layout from './Layout';
 import Dashboard from './Dashboard';
 import InBodyManager from './InBodyManager';
 import MealTracker from './MealTracker';
+import StaffPortal from './StaffPortal';
 import { LogOut } from 'lucide-react';
 
 const App: React.FC = () => {
   const [currentView, setView] = useState<ViewState>('login');
   
-  // 初期データの読み込み（localStorageから取得）
   const [user, setUser] = useState<UserProfile>(() => {
-    const saved = localStorage.getItem('coach_user_data');
-    return saved ? JSON.parse(saved) : { patientId: '', name: '', goal: DietGoal.GENERAL };
+    try {
+      const saved = localStorage.getItem('coach_user_data');
+      return saved ? JSON.parse(saved) : { patientId: '', name: '', goal: DietGoal.GENERAL };
+    } catch {
+      return { patientId: '', name: '', goal: DietGoal.GENERAL };
+    }
   });
 
   const [inBodyHistory, setInBodyHistory] = useState<InBodyData[]>(() => {
-    const saved = localStorage.getItem('coach_inbody_history');
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem('coach_inbody_history');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
   });
 
   const [mealLogs, setMealLogs] = useState<MealLog[]>(() => {
-    const saved = localStorage.getItem('coach_meal_logs');
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem('coach_meal_logs');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
   });
 
-  // データが更新されるたびに自動保存（useEffectを使用）
   useEffect(() => {
     localStorage.setItem('coach_user_data', JSON.stringify(user));
   }, [user]);
@@ -70,6 +81,10 @@ const App: React.FC = () => {
         </form>
       </div>
     );
+
+    if (currentView === 'staff-portal') {
+      return <StaffPortal onLogout={() => setView('login')} />;
+    }
 
     switch (currentView) {
       case 'dashboard':
